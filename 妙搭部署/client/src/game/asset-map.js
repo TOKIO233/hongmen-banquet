@@ -65,6 +65,9 @@ const gameAssets = {
   "voice/063.mp3": "/spark/app/app_17j0zzk6e9p/runtime/api/v1/storage/object/bucket_aadk7aofpxyqw/1881838036986890.mp3",
   "voice/064.mp3": "/spark/app/app_17j0zzk6e9p/runtime/api/v1/storage/object/bucket_aadk7aofpxyqw/1881838041041930.mp3",
   "voice/066.mp3": "/spark/app/app_17j0zzk6e9p/runtime/api/v1/storage/object/bucket_aadk7aofpxyqw/1881838036986906.mp3",
-  "voice/068.mp3": "/spark/app/app_17j0zzk6e9p/runtime/api/v1/storage/object/bucket_aadk7aofpxyqw/1881838048796732.mp3"
+  "voice/068.mp3": "/spark/app/app_17j0zzk6e9p/runtime/api/v1/storage/object/bucket_aadk7aofpxyqw/1881838048796732.mp3",
+  "voice/glm-guanzhongwang.mp3": "/spark/app/app_17j0zzk6e9p/runtime/api/v1/storage/object/bucket_aadk7aofpxyqw/1881841641127946.mp3",
+  "voice/xiangbo-wolai.mp3": "/spark/app/app_17j0zzk6e9p/runtime/api/v1/storage/object/bucket_aadk7aofpxyqw/1881841676548378.mp3",
+  "voice/glm-quanhe.mp3": "/spark/app/app_17j0zzk6e9p/runtime/api/v1/storage/object/bucket_aadk7aofpxyqw/1881841687177403.mp3"
 };
 function gameAsset(path) { return gameAssets[path] || path; }

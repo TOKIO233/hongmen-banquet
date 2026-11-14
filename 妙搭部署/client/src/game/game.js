@@ -4,36 +4,40 @@ const portraits={'范增':'fanzeng','刘邦':'liubang','项羽':'xiangyu','项�
 // AIGC 段使用全身照占位，其余段落使用站桩表演立绘。
 let showFullBody=true, showAnimated=false;
 // AIGC 段仍保留静态立绘，等待后续视频。
-const aigcLines=new Set([2,3,4,5,6,7,8,9,10,11,12,23,37,53,67,69,70,71,78,79,80,81,82,83]);
-const urgentLines=new Set([13,24,54,68,72]);
+const aigcLines=new Set([1,2,3,4,5,6,7,8,9,20,31,32,33,45,47,48,55,56,62]);
+const urgentLines=new Set([10,21,34,46,49]);
 function standingPose(n){ if(!showAnimated || !portraits[n]) return ''; const match=dialoguePoses[index+1]; if(match && match[0]===n && story[index][1]===n && match[1]===story[index][2]) return match[2]; return portraits[n]==='fanzeng' && urgentLines.has(index+1) ? 'fanzeng_urgent' : portraits[n]; }
 function portrait(n){if(n==='三个AI')return '<div class="portrait-group">'+['DeepSeek','Kimi','GLM'].map(x=>`<img data-fullbody="${showFullBody}" data-pose="${standingPose(x)}" data-portrait="${portraits[x]}" alt="${x}">`).join('')+'</div>';return portraits[n]?`<img class="portrait-image" data-fullbody="${showFullBody}" data-pose="${standingPose(n)}" data-portrait="${portraits[n]}" alt="${n}">`:art(n)}
 function drawActor(id,n,active){const el=$(id);el.className='actor'+(active?' active':'');const key=(n||'')+':'+showFullBody+':'+showAnimated+':'+standingPose(n);if(el.dataset.actorKey===key)return;el.dataset.actorKey=key;el.innerHTML=n?portrait(n)+`<span class="actor-label">${n}</span>`:'';mountPortraits(el)}
-// 每段独立管理播放状态，切换剧情时立即停止旧音频和动画。
-let voiceAudio=null, revealFrame=0, revealComplete=true, lineStarted=0, currentText='';
-function stopVoice(){cancelAnimationFrame(revealFrame);if(voiceAudio){voiceAudio.pause();voiceAudio.removeAttribute('src');voiceAudio.load();voiceAudio=null}}
-function showAll(){cancelAnimationFrame(revealFrame);$('line').textContent=currentText;revealComplete=true;$('next').textContent=index===story.length-1?'重温故事　↺':'点击继续　◆'}
-function startLine(text){
-  stopVoice();currentText=text;revealComplete=false;lineStarted=performance.now();$('line').textContent='';$('next').textContent='点击显示全文　◆';
-  const entry=voiceLines[index+1];
-  // 配音必须与台词匹配，避免插入剧情后音频错位。
-  const config=entry&&entry.text===text?entry:null;
-  if(config&&config.src){const audio=new Audio(config.src);voiceAudio=audio;audio.addEventListener('ended',()=>{if(voiceAudio===audio)showAll()},{once:true});audio.addEventListener('error',()=>{if(voiceAudio===audio){voiceAudio=null;lineStarted=performance.now()}},{once:true});audio.play().catch(()=>{if(voiceAudio===audio){voiceAudio=null;lineStarted=performance.now()}})}
-  const chars=Array.from(text);
-  function tick(now){
-    if(revealComplete)return;
-    let count;
-    if(voiceAudio&&Number.isFinite(voiceAudio.duration)&&voiceAudio.duration>0){
-      // 可配置每段字幕的开始时间；没有时间轴时按音频时长估算。
-      if(Array.isArray(config.cues)&&config.cues.length){count=0;for(const cue of config.cues){if(voiceAudio.currentTime>=cue.at)count+=Array.from(cue.text).length;else break}}
-      else count=Math.ceil(chars.length*Math.min(1,voiceAudio.currentTime/voiceAudio.duration));
-    }else if(voiceAudio){count=0}
-    else count=Math.floor((now-lineStarted)/70)+1;
-    $('line').textContent=chars.slice(0,count).join('');
-    if(!voiceAudio&&count>=chars.length){showAll();return}revealFrame=requestAnimationFrame(tick);
-  }revealFrame=requestAnimationFrame(tick);
+// 音频独立播放；字幕按标点分段出现，不等待音频进度。
+let voiceAudio=null, revealTimer=0, revealComplete=true, currentText='', chunks=[], chunkIndex=0;
+function stopVoice(){clearTimeout(revealTimer);if(voiceAudio){voiceAudio.pause();voiceAudio.removeAttribute('src');voiceAudio.load();voiceAudio=null}}
+function fitLine(text){
+  const el=$('line'); el.textContent=text;
+  let low=1,high=40,best=1;
+  while(low<=high){const size=Math.floor((low+high)/2);el.style.fontSize=size+'px';
+    if(el.scrollHeight<=el.clientHeight && el.scrollWidth<=el.clientWidth){best=size;low=size+1}else high=size-1;
+  }
+  el.style.fontSize=best+'px';
 }
+function showAll(){clearTimeout(revealTimer);$('line').textContent=currentText;revealComplete=true;$('next').textContent=index===story.length-1?'重温故事　↺':'点击继续　◆'}
+function startLine(text){
+  stopVoice();currentText=text;revealComplete=false;
+  fitLine(text);$('line').textContent='';
+  const entry=voiceLines[index+1];
+  if(entry&&entry.text===text&&entry.src){const audio=new Audio(entry.src);voiceAudio=audio;
+    audio.addEventListener('error',()=>{if(voiceAudio===audio)voiceAudio=null},{once:true});
+    audio.play().catch(()=>{if(voiceAudio===audio)voiceAudio=null});
+  }
+  chunks=text.match(/[^，,。！？!?；;：:]+[，,。！？!?；;：:]*/g)||[text];chunkIndex=0;
+  function reveal(){chunkIndex++;$('line').textContent=chunks.slice(0,chunkIndex).join('');
+    if(chunkIndex>=chunks.length){showAll();return}
+    $('next').textContent='点击显示全文　◆';revealTimer=setTimeout(reveal,650);
+  }
+  reveal();
+}
+window.addEventListener('resize',()=>{if(currentText&&story[index][1]!=='选择'){const shown=$('line').textContent;fitLine(currentText);$('line').textContent=shown}});
 const titles={'序章':'重生入席','第一幕':'坚定杀心','第二幕':'项庄舞剑','第三幕':'请君入瓮','第四幕':'刘邦遁走','终章':'刘邦被捕'};
-function render(){let [chapter,name,text,extra]=story[index];showFullBody=true;showAnimated=!aigcLines.has(index+1);let isChoice=name==='选择',isNarrator=name==='旁白';if(!isChoice&&!isNarrator){left='范增';if(name!=='范增')right=name;else if([13,24,54,72].includes(index+1))right='三个AI';previous=name}$('aigc-label').hidden=!aigcLines.has(index+1);let side=name===left?'left':'right';$('stage').className='stage'+(chapter==='第四幕'||chapter==='终章'?' gate':'')+(showFullBody?' standing-scene':'');drawActor('left',left,!isChoice&&!isNarrator&&side==='left');drawActor('right',right,!isChoice&&!isNarrator&&side==='right');$('dialog').className='dialog'+(!isChoice&&!isNarrator&&side==='right'?' right':'')+(isChoice?' is-choice':'');$('name').textContent=name;$('line').textContent=text;$('action').textContent=typeof extra==='string'?extra:'';$('choices').innerHTML='';$('hint').textContent='';$('next').textContent=isChoice?'':index===story.length-1?'重温故事　↺':'点击继续　◆';if(isChoice){extra.options.forEach((label,i)=>{let b=document.createElement('button');b.className='choice';b.innerHTML=`<b>${String.fromCharCode(65+i)}</b>`;b.append(document.createTextNode(label));b.onclick=e=>{e.stopPropagation();if(i===extra.correct){index++;render()}else{$('hint').textContent='此方案未展开，请选择文档中的主线方案。'}};$('choices').append(b)})}else if($('start').classList.contains('hidden'))startLine(text)}
+function render(){let [chapter,name,text,extra]=story[index];showFullBody=true;showAnimated=!aigcLines.has(index+1);let isChoice=name==='选择',isNarrator=name==='旁白';if(!isChoice&&!isNarrator){left='范增';if(name!=='范增')right=name;else if([10,21,34,49].includes(index+1))right='三个AI';previous=name}$('aigc-label').hidden=!aigcLines.has(index+1);let side=name===left?'left':'right';$('stage').className='stage'+(chapter==='第四幕'||chapter==='终章'?' gate':'')+(showFullBody?' standing-scene':'');drawActor('left',left,!isChoice&&!isNarrator&&side==='left');drawActor('right',right,!isChoice&&!isNarrator&&side==='right');$('dialog').className='dialog'+(!isChoice&&!isNarrator&&side==='right'?' right':'');$('dialog-wrap').hidden=isChoice;$('choice-panel').hidden=!isChoice;$('name').textContent=name;$('line').textContent=text;$('choices').innerHTML='';$('hint').textContent='';$('next').textContent=isChoice?'':index===story.length-1?'重温故事　↺':'点击继续　◆';if(isChoice){extra.options.forEach((label,i)=>{let b=document.createElement('button');b.className='choice';b.textContent=label.replace(/^(?:KiMi|Kimi|DeepSeek|DS|GLM)\s*[：:]\s*/i,'');b.onclick=e=>{e.stopPropagation();if(i===extra.correct){index++;render()}else{$('hint').textContent='此方案未展开，请选择文档中的主线方案。'}};$('choices').append(b)})}else if($('start').classList.contains('hidden'))startLine(text)}
 function advance(){if(story[index][1]==='选择')return;if(!revealComplete){showAll();return;}stopVoice();if(index===story.length-1){index=0;left='范增';right='三个AI';previous='范增';$('start').classList.remove('hidden')}else index++;render()}
 $('dialog').onclick=advance;$('dialog').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();advance()}};$('begin').onclick=()=>{$('start').classList.add('hidden');render()};document.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.target.matches('button')){e.preventDefault();if(!$('start').classList.contains('hidden'))$('begin').click();else advance()}});render();
