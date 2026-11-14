@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "skills": [],
+  "community": [
+    {
+      "id": "comments-guide",
+      "digest": "e64ba98d6cf07086012f895440fec8ec5864ab612b9266cb362aa49688adfe08"
+    },
+    {
+      "id": "mcp-guide",
+      "digest": "4bcba282f8c1a90122a1f07b6b449cb51d071a515b07adb063c39c3d5171a59c"
+    },
+    {
+      "id": "server-contacts-contract",
+      "digest": "d1b57cdbc1bc74330c203d5b3907eed221efe25309b010d93533f15817920d9b"
+    },
+    {
+      "id": "trigger-guide",
+      "digest": "a579c452a76f7ffe1ed7657618fdf7db0a82464ebc30592d1a5eabb64e75df6e"
+    },
+    {
+      "id": "user-identity",
+      "digest": "c1cebbdfee687fc16332f85818972c0b688435537f401a9437cd1f74dfc21dbd"
+    },
+    {
+      "id": "authz-guide",
+      "digest": "aadb0c70d7d547a4a0816755111db8dca7ceaba42d1b167d9a6fc0549e7b567b"
+    },
+    {
+      "id": "client-builtins-user-service",
+      "digest": "52ea106e3209849580b733adc77d46fd91d45a68160ae423fd342621980fc90a"
+    },
+    {
+      "id": "code-fix",
+      "digest": "afe88eee5b6db5541d0ac411f5d5699184dd90d7d6e153ce79634935b9acc716"
+    },
+    {
+      "id": "coding-guide",
+      "digest": "282af54a3f80007b8eca39f161c68802e932c2ec268693349794b53a6a81846e"
+    },
+    {
+      "id": "openapi-guide",
+      "digest": "79f6b501ed094c386b86701c1c23e514ea1fe4608d995c72c3b9aeaefd5cade2"
+    },
+    {
+      "id": "plugin-guide",
+      "digest": "1d0a4283036137edb889a27aecbbd4326e109e6739ab3bf7f287d0e019e386bc"
+    }
+  ],
+  "local": []
+}
