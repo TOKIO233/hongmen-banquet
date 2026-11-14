@@ -9,8 +9,8 @@ const urgentLines=new Set([10,21,34,46,49]);
 function standingPose(n){ if(!showAnimated || !portraits[n]) return ''; const match=dialoguePoses[index+1]; if(match && match[0]===n && story[index][1]===n && match[1]===story[index][2]) return match[2]; return portraits[n]==='fanzeng' && urgentLines.has(index+1) ? 'fanzeng_urgent' : portraits[n]; }
 function portrait(n){if(n==='三个AI')return '<div class="portrait-group">'+['DeepSeek','Kimi','GLM'].map(x=>`<img data-fullbody="${showFullBody}" data-pose="${standingPose(x)}" data-portrait="${portraits[x]}" alt="${x}">`).join('')+'</div>';return portraits[n]?`<img class="portrait-image" data-fullbody="${showFullBody}" data-pose="${standingPose(n)}" data-portrait="${portraits[n]}" alt="${n}">`:art(n)}
 function drawActor(id,n,active){const el=$(id);el.className='actor'+(active?' active':'');const key=(n||'')+':'+showFullBody+':'+showAnimated+':'+standingPose(n);if(el.dataset.actorKey===key)return;el.dataset.actorKey=key;el.innerHTML=n?portrait(n)+`<span class="actor-label">${n}</span>`:'';mountPortraits(el)}
-// 音频独立播放；字幕按标点分段出现，不等待音频进度。
-let voiceAudio=null, revealTimer=0, revealComplete=true, currentText='', chunks=[], chunkIndex=0;
+// 音频独立播放；字幕匀速逐字显示，不等待音频进度。
+let voiceAudio=null, revealTimer=0, revealComplete=true, currentText='', chars=[], charIndex=0;
 function stopVoice(){clearTimeout(revealTimer);if(voiceAudio){voiceAudio.pause();voiceAudio.removeAttribute('src');voiceAudio.load();voiceAudio=null}}
 function fitLine(text){
   const el=$('line'); el.textContent=text;
@@ -29,10 +29,10 @@ function startLine(text){
     audio.addEventListener('error',()=>{if(voiceAudio===audio)voiceAudio=null},{once:true});
     audio.play().catch(()=>{if(voiceAudio===audio)voiceAudio=null});
   }
-  chunks=text.match(/[^，,。！？!?；;：:]+[，,。！？!?；;：:]*/g)||[text];chunkIndex=0;
-  function reveal(){chunkIndex++;$('line').textContent=chunks.slice(0,chunkIndex).join('');
-    if(chunkIndex>=chunks.length){showAll();return}
-    $('next').textContent='点击显示全文　◆';revealTimer=setTimeout(reveal,650);
+  chars=Array.from(text);charIndex=0;
+  function reveal(){charIndex++;$('line').textContent=chars.slice(0,charIndex).join('');
+    if(charIndex>=chars.length){showAll();return}
+    $('next').textContent='点击显示全文　◆';revealTimer=setTimeout(reveal,70);
   }
   reveal();
 }
