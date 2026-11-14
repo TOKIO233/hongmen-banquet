@@ -14,7 +14,7 @@ let voiceAudio=null, revealTimer=0, revealComplete=true, currentText='', chunks=
 function stopVoice(){clearTimeout(revealTimer);if(voiceAudio){voiceAudio.pause();voiceAudio.removeAttribute('src');voiceAudio.load();voiceAudio=null}}
 function fitLine(text){
   const el=$('line'); el.textContent=text;
-  let low=1,high=40,best=1;
+  let low=1,high=34,best=1;
   while(low<=high){const size=Math.floor((low+high)/2);el.style.fontSize=size+'px';
     if(el.scrollHeight<=el.clientHeight && el.scrollWidth<=el.clientWidth){best=size;low=size+1}else high=size-1;
   }
