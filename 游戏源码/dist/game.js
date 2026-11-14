@@ -18,7 +18,7 @@ function fitLine(text){
   while(low<=high){const size=Math.floor((low+high)/2);el.style.fontSize=size+'px';
     if(el.scrollHeight<=el.clientHeight && el.scrollWidth<=el.clientWidth){best=size;low=size+1}else high=size-1;
   }
-  el.style.fontSize=Math.max(1,Math.floor(best*0.85))+'px';
+  el.style.fontSize=Math.max(1,Math.floor(best*0.78))+'px';
 }
 function showAll(){clearTimeout(revealTimer);$('line').textContent=currentText;revealComplete=true;$('next').textContent=index===story.length-1?'重温故事　↺':'点击继续　◆'}
 function startLine(text){
